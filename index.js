@@ -1,40 +1,14 @@
-const express = require('express');
-const db = require('./env'); 
-const app = express();
-const port = 3036;
-
-app.use(express.json()); 
-
-app.post('/api/pedido', async (req, res) => {
-  const { nombre_cliente, mesa, productos } = req.body;
-
-  try {
-    const [result] = await db.execute(
-      'INSERT INTO pedidos (nombre_cliente, mesa, total, fecha) VALUES (?, ?, ?, ?)',
-      [
-        nombre_cliente,
-        mesa,
-        productos.reduce((acc, prod) => acc + prod.precio * prod.cantidad, 0),
-        new Date(),
-      ]
-    );
-
-    const pedido_id = result.insertId;
-
-    for (const prod of productos) {
-      await db.execute(
-        'INSERT INTO productos (pedido_id, producto, cantidad, precio, notas) VALUES (?, ?, ?, ?, ?)',
-        [pedido_id, prod.producto, prod.cantidad, prod.precio, prod.notas]
-      );
-    }
-
-    res.status(201).json({ message: 'Pedido creado', pedido_id });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al crear el pedido' });
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+import express from 'express'
+import dotenv from 'dotenv'
+import { router as pedidos } from './routes/pedidos.js'
+const app = express()
+const PORT = 3000
+dotenv.config() // Carga las variables de entorno
+app.use(express.json()) // Middleware para parsear JSON
+app.use('/', pedidos) // Es dice que la ruta de pedidos estarán accesibles desde la raíz /
+app.get('/', (req, res) => {
+    res.send('Hola desde el API')
+})
+app.listen(PORT, () => { // Inicia el servidor
+    console.log(`Servidor inciado en el puerto ${PORT}`)
+})
