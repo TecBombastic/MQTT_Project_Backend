@@ -19,4 +19,5 @@ pool.getConnection((err, connection) => { // Prueba la conexión
     console.log('Base de datos conectada');
     connection.release(); // Libera la conexión para que otros la usen
 })
+
 export { pool } // Exporta el pool para usarlos en otros archivos
